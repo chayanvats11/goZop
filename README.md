@@ -107,6 +107,6 @@ This is goZop Garage Application which has been created using Go language and Go
             }
         }
         ```
-5. 4. <strong>Delete the Car from Garage ("cars/delete/id?id={ID}" or "cars/delete/registration?registrationNumber={REG_NUMBER}")<br></strong>
+5. <strong>Delete the Car from Garage ("cars/delete/id?id={ID}" or "cars/delete/registration?registrationNumber={REG_NUMBER}")<br></strong>
     - Method: DELETE
     - Response : 204
