@@ -69,7 +69,7 @@ func main() {
 	})
 
 	// Add a car to the garage
-	app.POST("/cars", func(ctx *gofr.Context) (interface{}, error) {
+	app.POST("/cars/add", func(ctx *gofr.Context) (interface{}, error) {
 		ctx.Gofr.Logger.Info("Adding a new car to the garage")
 		var registration_number = ctx.Param("registrationNumber")
 		var status = ctx.Param("status")
@@ -86,8 +86,8 @@ func main() {
 			return "Car already in garage", nil
 		}
 
-		// Check if the status is valid
-		if status != "IN_SERVICE" && status != "COMPLETED" {
+		// Check if the status is valid, allowing three values: entry, in_service, completed
+		if status != "ENTRY" && status != "IN_SERVICE" && status != "COMPLETED" {
 			return nil, errors.New("Invalid status")
 		}
 
@@ -115,7 +115,7 @@ func main() {
 	})
 
 	// Update the status of a car
-	app.PUT("/cars/:id", func(ctx *gofr.Context) (interface{}, error) {
+	app.PUT("/cars/update", func(ctx *gofr.Context) (interface{}, error) {
 		ctx.Gofr.Logger.Info("Updating the status of a car")
 		id := ctx.Param("id")
 		status := ctx.Param("status")
@@ -131,7 +131,7 @@ func main() {
 			return "Car not found", nil
 		}
 
-		// Check if the status is valid
+		// Check if the status is valid, allowing from entry,in_service to in_service or completed
 		if status != "IN_SERVICE" && status != "COMPLETED" {
 			return nil, errors.New("Invalid status")
 		}
@@ -142,7 +142,68 @@ func main() {
 			return nil, err
 		}
 
-		return "Status updated successfully", nil
+		// Create a response object with the ID
+		response := struct {
+			ID      string `json:"id"`
+			Message string `json:"message"`
+			Status  string `json:"status"`
+		}{
+			ID:      id,
+			Message: "Status updated successfully",
+			Status:  status,
+		}
+
+		return response, nil
+	})
+
+	// Delete a car from the garage based on ID
+	app.DELETE("/cars/delete/id", func(ctx *gofr.Context) (interface{}, error) {
+		ctx.Gofr.Logger.Info("Deleting a car from the garage based on ID")
+		id := ctx.Param("id")
+
+		// Check if the car exists
+		var count int
+		err := db.Get(&count, "SELECT COUNT(*) FROM cars WHERE id = ?", id)
+		if err != nil {
+			return nil, err
+		}
+
+		if count == 0 {
+			return "Car not found", nil
+		}
+
+		// Delete the car from the database
+		_, err = db.Exec("DELETE FROM cars WHERE id = ?", id)
+		if err != nil {
+			return nil, err
+		}
+
+		return map[string]string{"message": "Car deleted successfully", "id": id}, nil
+	})
+
+	// Delete a car from the garage based on Registration Number
+	app.DELETE("/cars/delete/registration", func(ctx *gofr.Context) (interface{}, error) {
+		ctx.Gofr.Logger.Info("Deleting a car from the garage based on Registration Number")
+		registrationNumber := ctx.Param("registrationNumber")
+
+		// Check if the car exists
+		var count int
+		err := db.Get(&count, "SELECT COUNT(*) FROM cars WHERE RegistrationNumber = ?", registrationNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		if count == 0 {
+			return "Car not found", nil
+		}
+
+		// Delete the car from the database
+		_, err = db.Exec("DELETE FROM cars WHERE RegistrationNumber = ?", registrationNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		return map[string]string{"message": "Car deleted successfully", "registration": registrationNumber}, nil
 	})
 
 	// Root endpoint
