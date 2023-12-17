@@ -35,8 +35,8 @@ This is goZop Garage Application which has been created using Go language and Go
 
 ## System Design
 
-![SystemDesign] (system_design.png)
+![System Design] (system_design.png)
 
 ## Database Schema and Flow
 
-![DatabaseSchema] (db_schema_flow.png)
+![Database Schema] (db_schema_flow.png)
